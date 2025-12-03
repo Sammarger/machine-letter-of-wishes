@@ -1,0 +1,1 @@
+[{"logs":[{"step":"move","result":"\n Command Interpreted successfully\n Dry-run: undefined","timestamp":"2025-12-01T16:31:51.575Z"},{"step":"Execute Command","result":"\n Target Path: /Users/samuelmarg/dev/digital-legacy/move-me.txt\n Destination Path: /Users/samuelmarg/dev/digital-legacy/move-file-to-here/","timestamp":"2025-12-01T16:31:51.692Z"}]}]

@@ -26,6 +26,17 @@ Destination Path:
 
 ## n8n Workflow Structure
 
+A simplified version of the machine readable wishes is a function that takes an XForms submission as an input, and returns a log of the execution.
+
+[Input: XForms File] -> [Wishes Executed] -> [Output: Log of Execution]
+
+### Switching from MD to XForms
+
+XForms as a platform for creating a machine readable letter of wishes is far more functional than a simple markdown file.
+- XForms submissions come in the form of JSON lists, removing the need for a custom MD to JSON file. 
+- From a users perspective, using XForms in this manner provides the user with a set of straightforward options to choose from, massively reducing the chance of input errors occurring.
+
+
 ### 1. Input Node (Read MD File)
 - **Node:** `Read/Write Files from Disk`  
 - **Purpose:** Reads the `.md` file from disk (or could be replaced by `HTTP Request` if loading from URL).  
