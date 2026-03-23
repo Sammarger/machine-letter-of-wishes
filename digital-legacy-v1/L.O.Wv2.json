@@ -1,0 +1,1002 @@
+{
+  "name": "L.O.Wv2",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "form-submission",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -288,
+        -128
+      ],
+      "id": "2d5b9e14-91d1-4cc7-91fe-61702ae939c3",
+      "name": "Webhook",
+      "webhookId": "cbcd0a6d-6cf1-466a-aa2e-72d50c0ef864"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "72e051d2-8460-47fa-80b4-dde27a2873ec",
+              "name": "Commands",
+              "value": "={{ $('Webhook').item.json.body.commands }}",
+              "type": "array"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -144,
+        16
+      ],
+      "id": "ebaa56d7-7a66-4407-8525-14cf48473128",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "batchSize": "=1",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        240,
+        16
+      ],
+      "id": "dbf90c30-8bde-4d3b-bb9d-70e6a606e0cf",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "Commands",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        0,
+        16
+      ],
+      "id": "42d8c871-56a6-4bf3-9f6d-83387d4fe642",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('Loop Over Items').item.json.command }}",
+                    "rightValue": "move",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "0aff0432-ec48-4b88-a9e2-d1422ff6350c"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "fcd9a9fa-9214-4a35-a5d0-b2edb8e673f4",
+                    "leftValue": "={{ $('Loop Over Items').item.json.command }}",
+                    "rightValue": "email",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        448,
+        288
+      ],
+      "id": "259f212d-cad0-4b5f-a4bd-cb82002f3b3d",
+      "name": "Switch",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        -352,
+        576
+      ],
+      "id": "ef49738b-c7d6-4825-ad02-a0680bb55f61",
+      "name": "EMAIL",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "rPao9w95xmNJEugK",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/rPao9w95xmNJEugK",
+          "cachedResultName": "L.O.W_move"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        -352,
+        400
+      ],
+      "id": "4da985d3-6249-4efb-bde3-7ebe9d6939bf",
+      "name": "MOVE FILE",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "content": "## Additional Notes & Features \n- Sub-workflow creation for expansion\n- Potentially move list to a Gsheet/csv, abstract the loop over items section\n\n\n\n",
+        "width": 512
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -352,
+        208
+      ],
+      "typeVersion": 1,
+      "id": "fff01cd3-a03c-4bce-91c7-4a116de585d4",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "operation": "toJson",
+        "binaryPropertyName": "={{ $json.commands }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        -128
+      ],
+      "id": "1efd2eba-f51d-46b2-891a-011a53418c7b",
+      "name": "Convert to File"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Loop over input items and add a new field called 'myNewField' to the JSON of each one\n\n\nreturn [ { commands : [] } ];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -144,
+        -128
+      ],
+      "id": "6876d4d1-71d0-4583-be53-83155858aa81",
+      "name": "Create Log Structure"
+    },
+    {
+      "parameters": {
+        "operation": "write",
+        "fileName": "={{ $('Webhook').item.json.body.commands[0].fileCreationDestination.path }}/logs.json",
+        "dataPropertyName": "=",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1.1,
+      "position": [
+        -288,
+        16
+      ],
+      "id": "32bd9ae9-4c1f-4c0b-b187-ce2cd1417bbd",
+      "name": "Write File"
+    },
+    {
+      "parameters": {
+        "content": "## Setup\n",
+        "height": 352,
+        "width": 512,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -352,
+        -176
+      ],
+      "typeVersion": 1,
+      "id": "2c22291b-3e7a-4428-bcad-23c11a594ab9",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "22b07748-aba4-478e-a67f-57644f9bbd54",
+              "leftValue": "={{ $('Loop Over Items').item.json.move.dryRun }}",
+              "rightValue": false,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        656,
+        272
+      ],
+      "id": "51cfe334-29ee-4955-9857-2dde2523d3ba",
+      "name": "Dryrun?"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Inputs (adjust these to where you store them)\nconst targetFile = $input.first().json.move.targetPath;         // e.g. \"/data/invoices/a.pdf\"\nconst destinationPath = $input.first().json.move.destination; // e.g. \"/archive/2026/\" OR \"/archive/2026/a.pdf\"\n\nconst fs = require('fs');\nconst path = require('path');\n\nif (!targetFile || !destinationPath) {\n  throw new Error('Missing targetFile or destinationPath');\n}\n\n// If destinationPath is a folder, keep same filename\nconst destIsDir = destinationPath.endsWith('/') || (!path.extname(destinationPath) && !destinationPath.includes('.'));\nconst finalDest = destIsDir\n  ? path.join(destinationPath, path.basename(targetFile))\n  : destinationPath;\n\n// Ensure destination folder exists\nfs.mkdirSync(path.dirname(finalDest), { recursive: true });\n\n// Move: rename first (fast), fallback to copy+delete if cross-device\ntry {\n  fs.renameSync(targetFile, finalDest);\n} catch (err) {\n  if (err.code === 'EXDEV') {\n    fs.copyFileSync(targetFile, finalDest);\n    fs.unlinkSync(targetFile);\n  } else {\n    throw err;\n  }\n}\n\nreturn [{ json: { moved: true, from: targetFile, to: finalDest } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        880,
+        272
+      ],
+      "id": "29427d1f-6a2c-432b-8781-fa23ad763cf3",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "22b07748-aba4-478e-a67f-57644f9bbd54",
+              "leftValue": "={{ $('Loop Over Items').item.json.email.dryRun }}",
+              "rightValue": false,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        656,
+        528
+      ],
+      "id": "8cc01378-66a6-45c4-b4d3-f45c77e565b1",
+      "name": "Dryrun?1"
+    },
+    {
+      "parameters": {
+        "operation": "fromJson",
+        "destinationKey": "logs",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        1328,
+        272
+      ],
+      "id": "dceec7bd-5e46-4d01-af88-5ee5d6fbd908",
+      "name": "Extract from File1"
+    },
+    {
+      "parameters": {
+        "fileSelector": "={{ $json.fileCreationDestination.path }}/logs.json",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        1104,
+        272
+      ],
+      "id": "56d2429f-8c13-4a76-a72a-756af9245081",
+      "name": "Read Logs"
+    },
+    {
+      "parameters": {
+        "jsCode": "const prevLogs = $input.first().json.logs[0].logs ?? [];\n\nconst logs = [...prevLogs];\n\nlogs.push({\n  step: 'Execute Move Command',\n  result: '\\n Target Path: ' + $('Loop Over Items').first().json.move.targetPath\n  + '\\n Destination Path: ' + $('Loop Over Items').first().json.move.destination,\n  timestamp: new Date().toISOString()\n});\n\nreturn { logs };\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1552,
+        272
+      ],
+      "id": "dac35974-2934-4829-a04f-dc1c27f4a79f",
+      "name": "Log Move File"
+    },
+    {
+      "parameters": {
+        "operation": "toJson",
+        "binaryPropertyName": "Logs",
+        "options": {
+          "fileName": "logs"
+        }
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        1776,
+        272
+      ],
+      "id": "4a8f7075-2509-4788-9e4d-86f4429c1d6b",
+      "name": "Convert to File2"
+    },
+    {
+      "parameters": {
+        "content": "## MOVE FILE\n",
+        "height": 208,
+        "width": 1504,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        624,
+        224
+      ],
+      "typeVersion": 1,
+      "id": "7ad5710d-74c7-4863-bd51-e03ae978c4f2",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "operation": "write",
+        "fileName": "={{ $('Switch').item.json.fileCreationDestination.path }}/logs.json",
+        "dataPropertyName": "=Logs",
+        "options": {
+          "append": false
+        }
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        2000,
+        272
+      ],
+      "id": "41beebbe-7497-4676-82ab-4031fbfbccf1",
+      "name": "Write Logs"
+    },
+    {
+      "parameters": {
+        "content": "## EMAIL\n",
+        "height": 208,
+        "width": 1504,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        624,
+        480
+      ],
+      "typeVersion": 1,
+      "id": "25290bf3-b920-40d9-890a-0145433e9fd3",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "fileSelector": "={{ $('Dryrun?1').item.json.fileDestinationPath }}/logs.json",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        1104,
+        528
+      ],
+      "id": "83136bba-7b80-4fdc-a648-4d9a9c6e77a4",
+      "name": "Read Logs1"
+    },
+    {
+      "parameters": {
+        "operation": "fromJson",
+        "destinationKey": "logs",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        1328,
+        528
+      ],
+      "id": "28b5bce9-56cc-4bc3-945e-bfe5f4f9cfe6",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "jsCode": "const prevLogs = $input.first().json.logs[0].logs ?? [];\n\nconst logs = [...prevLogs];\n\nlogs.push({\n  step: $('Loop Over Items').first().json.command,\n  result: 'Email Sent Successfully to ' \n  + ($('Loop Over Items').first().json.email.recipient ?? '')\n  + '\\n Email Subject: ' + $('Loop Over Items').first().json.email.subject\n  + '\\n Email Message: ' + $('Loop Over Items').first().json.email.message,\n  timestamp: new Date().toISOString()\n});\n\nreturn { logs };\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1536,
+        528
+      ],
+      "id": "5b8b0034-353f-4ebb-ab57-b81f18152744",
+      "name": "Log Send Email"
+    },
+    {
+      "parameters": {
+        "operation": "toJson",
+        "binaryPropertyName": "Logs",
+        "options": {
+          "fileName": "logs"
+        }
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        1776,
+        528
+      ],
+      "id": "c6e3cd29-447f-4617-a8b1-bd187718fadc",
+      "name": "Convert to File3"
+    },
+    {
+      "parameters": {
+        "operation": "write",
+        "fileName": "={{ $('Switch').item.json.fileCreationDestination.path }}/logs.json",
+        "dataPropertyName": "=Logs",
+        "options": {
+          "append": false
+        }
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        2000,
+        528
+      ],
+      "id": "b4516cee-d4b4-4a4d-8559-86789b31232a",
+      "name": "Write Logs1"
+    },
+    {
+      "parameters": {
+        "sendTo": "=samr.margerison@gmail.com",
+        "subject": "=Dry Run Execution: {{ $json.email.subject }}",
+        "message": "={{ $('Loop Over Items').item.json.email.subject }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        832,
+        528
+      ],
+      "id": "224522c7-efa3-4955-a816-a8909123058d",
+      "name": "DRY-RUN",
+      "webhookId": "3c079132-fd99-46c6-8c84-9b1c7da33dd1",
+      "alwaysOutputData": true,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "VIejPMB4aSBvywoq",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.email.recipient }}",
+        "subject": "={{ $json.email.subject }}",
+        "emailType": "text",
+        "message": "={{ $json.email.message }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        928,
+        528
+      ],
+      "id": "59041a2a-1508-4b66-8519-c599cd8baac3",
+      "name": "Message",
+      "webhookId": "9fcda3ae-06a5-4e4c-b22a-28b2b791ceda",
+      "alwaysOutputData": false,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "VIejPMB4aSBvywoq",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const logs = $input.first().json.logs[0].logs || [];\n\nlet md = \"# Workflow Report\\n\\n\";\nfor (const entry of logs) {\n  md += `## Step: ${entry.step}\\n`;\n  md += `- Time: ${entry.timestamp}\\n`;\n  md += `- Result: ${entry.result}\\n\\n`;\n}\n\nreturn {\n  json: { report: md }\n};\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        976,
+        -144
+      ],
+      "id": "59f8372f-0e65-4aa4-afbd-b9214e8563b7",
+      "name": "Compile Logs",
+      "executeOnce": false
+    },
+    {
+      "parameters": {
+        "operation": "toText",
+        "sourceProperty": "report",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        688,
+        16
+      ],
+      "id": "9c653303-44c4-426e-8438-38eea386b17e",
+      "name": "Convert to File1",
+      "executeOnce": false
+    },
+    {
+      "parameters": {
+        "fileSelector": "={{ $json.fileName }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        688,
+        -144
+      ],
+      "id": "ef1cf0b0-08c1-4d46-a873-c980f805c33b",
+      "name": "Read file"
+    },
+    {
+      "parameters": {
+        "operation": "fromJson",
+        "destinationKey": "logs",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        832,
+        -144
+      ],
+      "id": "87c1e0e5-8ad3-4ea4-b7af-10c9347eb8a3",
+      "name": "Extract logs"
+    },
+    {
+      "parameters": {
+        "operation": "write",
+        "fileName": "={{ $('Webhook').item.json.body.commands[0].fileCreationDestination.path }}/output.md ",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        832,
+        16
+      ],
+      "id": "495a75c1-b0b7-4685-b72d-fed8c2bd0238",
+      "name": "Write logs"
+    },
+    {
+      "parameters": {
+        "content": "## COMPILE DOCS",
+        "height": 384,
+        "width": 528,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        624,
+        -192
+      ],
+      "typeVersion": 1,
+      "id": "60a87dcb-73d3-44d0-be4d-66f5be10a2b9",
+      "name": "Sticky Note4"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Create Log Structure",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [
+          {
+            "node": "Read file",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Dryrun?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Dryrun?1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "EMAIL": {
+      "main": [
+        []
+      ]
+    },
+    "Convert to File": {
+      "main": [
+        [
+          {
+            "node": "Write File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Log Structure": {
+      "main": [
+        [
+          {
+            "node": "Convert to File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Write File": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Dryrun?": {
+      "main": [
+        [
+          {
+            "node": "Read Logs",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Read Logs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Logs": {
+      "main": [
+        [
+          {
+            "node": "Extract from File1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File1": {
+      "main": [
+        [
+          {
+            "node": "Log Move File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log Move File": {
+      "main": [
+        [
+          {
+            "node": "Convert to File2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to File2": {
+      "main": [
+        [
+          {
+            "node": "Write Logs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Write Logs": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Dryrun?1": {
+      "main": [
+        [
+          {
+            "node": "DRY-RUN",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Logs1": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Log Send Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log Send Email": {
+      "main": [
+        [
+          {
+            "node": "Convert to File3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to File3": {
+      "main": [
+        [
+          {
+            "node": "Write Logs1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Write Logs1": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DRY-RUN": {
+      "main": [
+        [
+          {
+            "node": "Read Logs1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message": {
+      "main": [
+        [
+          {
+            "node": "Read Logs1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Compile Logs": {
+      "main": [
+        [
+          {
+            "node": "Convert to File1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to File1": {
+      "main": [
+        [
+          {
+            "node": "Write logs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read file": {
+      "main": [
+        [
+          {
+            "node": "Extract logs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract logs": {
+      "main": [
+        [
+          {
+            "node": "Compile Logs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "cad89656-4963-4170-9780-a590911f58cc",
+  "meta": {
+    "instanceId": "64e255a1aff934d2bf3da49bbc1fa759a56e027871f2b39620f0948b09a3ef25"
+  },
+  "id": "gsgVLGQ67AC6nQRPzf_5K",
+  "tags": []
+}

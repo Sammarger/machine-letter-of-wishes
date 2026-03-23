@@ -1,0 +1,8 @@
+# Workflow Report
+
+## Step: Execute Move Command
+- Time: 2026-01-04T18:14:58.506Z
+- Result: 
+ Target Path: /Users/samuelmarg/dev/digital-legacy/move-me.txt
+ Destination Path: /Users/samuelmarg/dev/digital-legacy/move-file-to-here/
+
