@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:xf="http://www.w3.org/2002/xforms">
+<head>
+  <meta charset="utf-8" />
+  <title>Commands XForms (with JS fallback)</title>
+  <style>
+    body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; padding: 20px; }
+    .section { margin: 10px 0 20px; padding: 10px; border: 1px solid #ddd; border-radius: 6px; }
+    label { display: block; margin: 6px 0 3px; font-weight: 600; }
+    input[type="text"], textarea { width: 100%; box-sizing: border-box; padding: 8px; }
+    .hidden { display: none; }
+    .small { max-width: 480px; }
+  </style>
+</head>
+<body>
+  <h1>Commands XForms</h1>
+  <p>This file contains a simple XForms data model for two commands: <strong>Move File</strong> and <strong>Email</strong>.
+  A plain-JS fallback form is included so you can try it in a normal browser.</p>
+
+  <!-- XForms model (standard XForms markup) -->
+  <xf:html>
+    <xf:model>
+      <xf:instance id="command-data">
+        <commandData>
+          <command>move</command>
+          <move>
+            <targetPath></targetPath>
+            <destination></destination>
+            <dryRun>true</dryRun>
+          </move>
+          <email>
+            <recipient></recipient>
+            <subject>/subject>
+            <message></message>
+            <dryRun>true</dryRun>
+          </email>
+        </commandData>
+      </xf:instance>
+    </xf:model>
+
+    <xf:group>
+      <xf:label>Pick command (XForms UI)</xf:label>
+      <xf:select1 ref="/commandData/command">
+        <xf:item>
+          <xf:label>Move File</xf:label>
+          <xf:value>move</xf:value>
+        </xf:item>
+        <xf:item>
+          <xf:label>Email</xf:label>
+          <xf:value>email</xf:value>
+        </xf:item>
+      </xf:select1>
+    </xf:group>
+
+    <xf:group xf:relevant="/commandData/command = 'move'">
+      <xf:label>Move File parameters</xf:label>
+      <xf:input ref="/commandData/move/targetPath"><xf:label>Target File Path</xf:label></xf:input>
+      <xf:input ref="/commandData/move/move_destination"><xf:label>Destination</xf:label></xf:input>
+      <xf:input ref="/commandData/move/dryRun"><xf:label>Dry Run</xf:label></xf:input>
+    </xf:group>
+
+    <xf:group xf:relevant="/commandData/command = 'email'">
+      <xf:label>Email parameters</xf:label>
+      <xf:input ref="/commandData/email/recipient"><xf:label>Email Recipient</xf:label></xf:input>
+      <xf:input ref="/commandData/email/subject"><xf:label>Email Subject</xf:label></xf:input>
+      <xf:textarea ref="/commandData/email/message"><xf:label>Email Message</xf:label></xf:textarea>
+      <xf:input ref="/commandData/email/dryRun"><xf:label>Dry Run</xf:label></xf:input>
+    </xf:group>
+
+  </xf:html>
+
+  <!-- Plain HTML fallback (works in any modern browser) -->
+  <div class="section small">
+    <label for="cmd-select">Command</label>
+    <select id="cmd-select">
+      <option value="move">Move File</option>
+      <option value="email">Email</option>
+    </select>
+
+    <div id="move-section" class="section">
+      <label for="targetFile">Select file to move</label>
+      <input id="targetFile" type="file" />
+
+      <small>If you prefer, you can still enter a path manually:</small>
+      <label for="targetPath">Target File Path (fallback)</label>
+      <input id="targetPath" type="text" value="" />
+
+      <label for="destination">Destination</label>
+      <input id="destination" type="text" value="" />
+
+      <label><input id="move-dryrun" type="checkbox" checked /> Dry Run</label>
+    </div>
+
+    <div id="email-section" class="section hidden">
+      <label for="recipient">Email Recipient</label>
+      <input id="recipient" type="text" value="" />
+
+      <label for="subject">Email Subject</label>
+      <input id="subject" type="text" value="" />
+
+      <label for="message">Email Message</label>
+      <textarea id="message">Goodbye!</textarea>
+
+      <label><input id="email-dryrun" type="checkbox" checked /> Dry Run</label>
+    </div>
+    <button id="add-to-queue">Add To Queue</button>
+    </div>
+
+    <div id="file-destination-section" class="section small">
+      <h4>File creation destination</h4>
+      <p>Where output files should be stored. You can pick a directory (if supported) or enter a path.</p>
+      <label>Pick a directory (optional)</label>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <button id="choose-dir-btn" type="button">Choose directory</button>
+        <input id="destination-dir-picker" type="file" webkitdirectory directory style="display:none" />
+        <span id="chosen-dir-name" style="font-size:0.9em;color:#555"></span>
+      </div>
+      <small>If your browser doesn't support a native directory picker, use the button above to select a folder (fallback) or use the path input below.</small>
+
+      <label for="file-destination">File creation destination (path fallback)</label>
+      <input id="file-destination" type="text" placeholder="Input directory path" />
+    </div>
+
+    <div class="section small">
+      <label for="webhook-url">n8n Webhook URL (optional)</label>
+      <input id="webhook-url" type="text" placeholder="https://your-n8n.example/webhook/my-webhook-path" />
+      <label><input id="send-webhook" type="checkbox" /> Send payload to webhook</label>
+      <div style="margin-top:8px">
+          <button id="preview">Preview Payload</button>
+          <button id="submit">Submit</button>
+          <button id="clear">Clear</button>
+        </div>
+    </div>
+
+    <h3>Payload preview</h3>
+    <textarea id="payload" rows="10" class="small" readonly></textarea>
+    <h3>Commands queue</h3>
+    <div id="commands-queue" class="small"></div>
+  </div>
+
+  <script>
+    // Simple JS fallback to switch sections and build payload
+    const cmdSelect = document.getElementById('cmd-select');
+    const moveSec = document.getElementById('move-section');
+    const emailSec = document.getElementById('email-section');
+    const preview = document.getElementById('preview');
+    const clearBtn = document.getElementById('clear');
+    const payload = document.getElementById('payload');
+    const addToQueueBtn = document.getElementById('add-to-queue');
+    const queueDiv = document.getElementById('commands-queue');
+
+    // command queue
+    let commandsQueue = [];
+    // directory picker fallback variables
+    const chooseDirBtn = document.getElementById('choose-dir-btn');
+    const destPickerInput = document.getElementById('destination-dir-picker');
+    const chosenDirName = document.getElementById('chosen-dir-name');
+    let destinationFilesFromFS = null; // array of File objects when chosen via showDirectoryPicker
+
+    // Setup directory picker: prefer native showDirectoryPicker when available
+    if (window.showDirectoryPicker) {
+      destPickerInput.style.display = 'none';
+      chooseDirBtn.addEventListener('click', async () => {
+        try {
+          const dirHandle = await window.showDirectoryPicker();
+          chosenDirName.textContent = dirHandle.name || '(directory)';
+          // traverse recursively and collect File objects
+          const files = [];
+          async function traverse(handle, path = '') {
+            for await (const entry of handle.values()) {
+              if (entry.kind === 'file') {
+                const file = await entry.getFile();
+                // set a relative path property for parity with webkitdirectory
+                try { file.webkitRelativePath = path ? `${path}/${entry.name}` : entry.name; } catch (e) {}
+                files.push(file);
+              } else if (entry.kind === 'directory') {
+                await traverse(entry, path ? `${path}/${entry.name}` : entry.name);
+              }
+            }
+          }
+          await traverse(dirHandle);
+          destinationFilesFromFS = files;
+        } catch (err) {
+          // user cancelled or not permitted
+          chosenDirName.textContent = '(no directory selected)';
+          destinationFilesFromFS = null;
+        }
+      });
+    } else {
+      // If no native API, show the fallback input and label it appropriately
+      destPickerInput.style.display = '';
+      chooseDirBtn.addEventListener('click', () => destPickerInput.click());
+      destPickerInput.addEventListener('change', () => {
+        if (destPickerInput.files && destPickerInput.files.length > 0) {
+          // get common root name from first file's webkitRelativePath if present
+          const first = destPickerInput.files[0];
+          const rel = first.webkitRelativePath || first.name;
+          const root = rel.split('/')[0];
+          chosenDirName.textContent = root || '(selected)';
+        } else {
+          chosenDirName.textContent = '';
+        }
+      });
+    }
+
+    function updateVisibility() {
+      if (cmdSelect.value === 'move') {
+        moveSec.classList.remove('hidden');
+        emailSec.classList.add('hidden');
+      } else {
+        moveSec.classList.add('hidden');
+        emailSec.classList.remove('hidden');
+      }
+    }
+
+    cmdSelect.addEventListener('change', updateVisibility);
+    updateVisibility();
+
+    async function readFileAsBase64(file) {
+      return await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onerror = () => reject(new Error('Failed reading file'));
+        reader.onload = () => {
+          const arr = new Uint8Array(reader.result);
+          // convert to base64
+          let binary = '';
+          const chunkSize = 0x8000;
+          for (let i = 0; i < arr.length; i += chunkSize) {
+            const chunk = arr.subarray(i, i + chunkSize);
+            binary += String.fromCharCode.apply(null, chunk);
+          }
+          resolve(btoa(binary));
+        };
+        reader.readAsArrayBuffer(file);
+      });
+    }
+
+    async function readMultipleFilesAsBase64(fileList) {
+      const files = Array.from(fileList || []);
+      return await Promise.all(files.map(async (f) => {
+        const base64 = await readFileAsBase64(f);
+        // webkitRelativePath gives a relative path when directory picking
+        const rel = f.webkitRelativePath || f.name;
+        return {
+          name: f.name,
+          relativePath: rel,
+          type: f.type || 'application/octet-stream',
+          size: f.size,
+          base64
+        };
+      }));
+    }
+
+    async function buildCurrentCommandObject() {
+      const cmd = cmdSelect.value;
+      let out = { command: cmd };
+      if (cmd === 'move') {
+        const fileInput = document.getElementById('targetFile');
+        const fallbackPath = document.getElementById('targetPath').value;
+        const moveDestination = document.getElementById('destination').value;
+        const dry = !!document.getElementById('move-dryrun').checked;
+
+        out.move = {
+          dryRun: dry,
+          destination: moveDestination,
+        };
+
+        // If user picked a source file, include it
+        if (fileInput && fileInput.files && fileInput.files.length > 0) {
+          const f = fileInput.files[0];
+          try {
+            const data64 = await readFileAsBase64(f);
+            out.move.file = {
+              name: f.name,
+              type: f.type || 'application/octet-stream',
+              size: f.size,
+              base64: data64
+            };
+          } catch (e) {
+            out.move.fileError = String(e.message || e);
+          }
+        } else {
+          // no source file selected, use fallback path
+          out.move.targetPath = fallbackPath;
+        }
+
+        // If user picked a destination directory to upload, read all files and include them
+        const destPicker = document.getElementById('destination-dir-picker');
+        try {
+          let filesToRead = null;
+          if (destinationFilesFromFS && destinationFilesFromFS.length > 0) {
+            filesToRead = destinationFilesFromFS;
+          } else if (destPicker && destPicker.files && destPicker.files.length > 0) {
+            filesToRead = destPicker.files;
+          }
+
+          if (filesToRead && filesToRead.length > 0) {
+            const uploadFiles = await readMultipleFilesAsBase64(filesToRead);
+            out.move.destinationUpload = {
+              count: uploadFiles.length,
+              files: uploadFiles
+            };
+          }
+        } catch (e) {
+          out.move.destinationUploadError = String(e.message || e);
+        }
+
+      } else {
+        out.email = {
+          recipient: document.getElementById('recipient').value,
+          subject: document.getElementById('subject').value,
+          message: document.getElementById('message').value,
+          dryRun: !!document.getElementById('email-dryrun').checked,
+        };
+      }
+
+      // Add both legacy and explicit file destination fields to the payload
+      const fileDestinationPath = document.getElementById('file-destination').value;
+      const chosenDirNameValue = chosenDirName.textContent || '';
+      out.fileDestinationPath = fileDestinationPath;
+      out.fileCreationDestination = {
+        path: fileDestinationPath,
+        directoryName: chosenDirNameValue
+      };
+
+      return out;
+    }
+
+    preview.addEventListener('click', async () => {
+      if (commandsQueue.length > 0) {
+        // show queued commands
+        payload.value = JSON.stringify({ commands: commandsQueue }, null, 2);
+      } else {
+        const out = await buildCurrentCommandObject();
+        payload.value = JSON.stringify(out, null, 2);
+      }
+    });
+
+    function renderQueue() {
+      queueDiv.innerHTML = '';
+      if (commandsQueue.length === 0) {
+        queueDiv.textContent = '(queue is empty)';
+        return;
+      }
+      commandsQueue.forEach((item, idx) => {
+        const card = document.createElement('div');
+        card.className = 'section';
+        const title = document.createElement('div');
+        title.style.display = 'flex';
+        title.style.justifyContent = 'space-between';
+        const h = document.createElement('strong');
+        h.textContent = `${idx+1}. ${item.command}`;
+        title.appendChild(h);
+        const controls = document.createElement('div');
+        const up = document.createElement('button'); up.textContent = '↑';
+        const down = document.createElement('button'); down.textContent = '↓';
+        const rm = document.createElement('button'); rm.textContent = 'Remove';
+        up.addEventListener('click', () => { if (idx>0) { [commandsQueue[idx-1], commandsQueue[idx]] = [commandsQueue[idx], commandsQueue[idx-1]]; renderQueue(); } });
+        down.addEventListener('click', () => { if (idx<commandsQueue.length-1) { [commandsQueue[idx+1], commandsQueue[idx]] = [commandsQueue[idx], commandsQueue[idx+1]]; renderQueue(); } });
+        rm.addEventListener('click', () => { commandsQueue.splice(idx,1); renderQueue(); });
+        controls.appendChild(up); controls.appendChild(down); controls.appendChild(rm);
+        title.appendChild(controls);
+        card.appendChild(title);
+        const pre = document.createElement('pre');
+        pre.textContent = JSON.stringify(item, null, 2);
+        card.appendChild(pre);
+        queueDiv.appendChild(card);
+      });
+    }
+
+    addToQueueBtn.addEventListener('click', async (e) => {
+      e.preventDefault();
+      const obj = await buildCurrentCommandObject();
+      commandsQueue.push(obj);
+      renderQueue();
+      payload.value = JSON.stringify({ commands: commandsQueue }, null, 2);
+    });
+
+    // Submit: build payload; optionally POST to an n8n webhook, then open/download
+    const submitBtn = document.getElementById('submit');
+    const webhookUrlInput = document.getElementById('webhook-url');
+    const sendWebhookCheckbox = document.getElementById('send-webhook');
+
+    submitBtn.addEventListener('click', async () => {
+      const payloadObj = (commandsQueue.length > 0) ? { commands: commandsQueue } : await buildCurrentCommandObject();
+      const json = JSON.stringify(payloadObj, null, 2);
+
+      // Only submit to webhook (no download)
+      if (!sendWebhookCheckbox.checked) {
+        alert('Enable "Send payload to webhook" and provide a webhook URL to submit. Use Preview to inspect the payload.');
+        return;
+      }
+
+      const url = webhookUrlInput.value.trim();
+      if (!url) {
+        alert('Please provide the n8n webhook URL in the field above.');
+        return;
+      }
+
+      // Try to POST to the webhook URL
+      try {
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: json,
+          mode: 'cors'
+        });
+
+        const text = await res.text();
+
+        // Open response in a new window for visibility
+        const win = window.open('', '_blank');
+        if (win) {
+          win.document.title = 'n8n Webhook Response';
+          const h = win.document.createElement('h2');
+          h.textContent = `HTTP ${res.status} ${res.statusText}`;
+          const pre = win.document.createElement('pre');
+          pre.textContent = text;
+          win.document.body.appendChild(h);
+          win.document.body.appendChild(pre);
+        } else {
+          alert(`Webhook POST completed: HTTP ${res.status} ${res.statusText}`);
+        }
+
+      } catch (err) {
+        alert('Error sending to webhook: ' + err.message);
+      }
+    });
+
+    clearBtn.addEventListener('click', () => { payload.value = ''; });
+  </script>
+
+</body>
+</html>
